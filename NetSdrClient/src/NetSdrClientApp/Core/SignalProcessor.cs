@@ -43,5 +43,8 @@ public class SignalProcessor
 public class SignalStatistics
 {
     public int TotalOperations { get; set; }
+    using NetSdrClientApp.Echo;
+private EchoServer? _server; // violation
+
     public int LastLength { get; set; }
 }
