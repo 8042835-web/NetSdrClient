@@ -1,31 +1,44 @@
 namespace NetSdrClientApp.Infrastructure;
 
-public interface ISignalSource
+public class ConsoleSignalSource
 {
-    IReadOnlyList<double> ReadSamples(int count);
-}
+    private const string InputPrompt = "Enter comma-separated numbers:";
+    private const string InvalidFormatMessage = "Invalid input. Expected comma-separated numbers.";
 
-/// <summary>
-/// Very primitive "infrastructure" implementation that just generates random values.
-/// </summary>
-public class ConsoleSignalSource : ISignalSource
-{
-    private readonly Random _random = new();
-
-    public IReadOnlyList<double> ReadSamples(int count)
+    public double[] ReadSamples()
     {
-        if (count <= 0)
+        Console.WriteLine(InputPrompt);
+        var? input = Console.ReadLine();
+
+        if (string.IsNullOrWhiteSpace(input))
         {
-            throw new ArgumentOutOfRangeException(nameof(count));
+            return Array.Empty<double>();
         }
 
-        var data = new double[count];
-        for (var i = 0; i < count; i++)
+        var parts = SplitInput(input);
+        return ParseParts(parts);
+    }
+
+    private static string[] SplitInput(string input)
+    {
+        return input.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+    }
+
+    private static double[] ParseParts(IEnumerable<string> parts)
+    {
+        var list = new List<double>();
+
+        foreach (var part in parts)
         {
-            // Random value in [-1; 1]
-            data[i] = _random.NextDouble() * 2 - 1;
+            if (!double.TryParse(part, out var value))
+            {
+                Console.WriteLine(InvalidFormatMessage);
+                return Array.Empty<double>();
+            }
+
+            list.Add(value);
         }
 
-        return data;
+        return list.ToArray();
     }
 }
