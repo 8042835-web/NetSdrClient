@@ -1,4 +1,5 @@
 # NetSdrClient Labs (1–8)
+Trigger GitHub Actions
 
 Це навчальний репозиторій, який можна використати як готову основу
 для 8 лабораторних з реінжинірингу ПЗ.
@@ -19,4 +20,3 @@
 3. У файлі `.github/workflows/sonarcloud.yml` замінити `YOUR_PROJECT_KEY` і `YOUR_ORG_KEY`
    на реальні значення з SonarCloud.
 4. Поступово виконувати кроки з методички, створюючи Pull Request для кожної лаби.
-Test trigger for GitHub Actions
