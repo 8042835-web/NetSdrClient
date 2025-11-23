@@ -1,0 +1,45 @@
+name: Build, Test and Analyze
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install SonarScanner for .NET
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: Restore
+        run: dotnet restore NetSdrClient.sln
+
+      - name: Build
+        run: dotnet build NetSdrClient.sln --no-restore -c Release
+
+      - name: Test with coverage
+        run: dotnet test NetSdrClient.sln -c Release --no-build /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=cobertura
+
+      - name: SonarCloud Analyze
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          export PATH="$PATH:/home/runner/.dotnet/tools"
+          dotnet sonarscanner begin /k:"YOUR_PROJECT_KEY" /o:"YOUR_ORG_KEY" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="$SONAR_TOKEN" /d:sonar.cs.opencover.reportsPaths="**/coverage.cobertura.xml"
+          dotnet build NetSdrClient.sln -c Release
+          dotnet sonarscanner end /d:sonar.login="$SONAR_TOKEN"
