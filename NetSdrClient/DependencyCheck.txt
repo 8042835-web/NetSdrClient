@@ -1,0 +1,3 @@
+dotnet list NetSdrClient.sln package --outdated --include-transitive
+
+(Команда використовується для перевірки застарілих NuGet-пакетів у рамках Лабораторної 7)
