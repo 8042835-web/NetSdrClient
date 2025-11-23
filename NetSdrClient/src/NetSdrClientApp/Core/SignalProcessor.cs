@@ -1,47 +1,50 @@
 namespace NetSdrClientApp.Core;
 
-/// <summary>
-/// Very small "core" service to have something to test and measure.
-/// </summary>
 public class SignalProcessor
 {
+    private const double ZeroEpsilon = 1e-9;
+
     public SignalStatistics Statistics { get; } = new();
 
     public IReadOnlyList<double> Normalize(IEnumerable<double> samples)
     {
-        var list = samples.ToList();
-        Statistics.LastLength = list.Count;
-        Statistics.TotalOperations++;
+        var sampleArray = samples as double[] ?? samples.ToArray();
+        UpdateStatistics(sampleArray.Length);
 
-        if (list.Count == 0)
-        {
+        if (sampleArray.Length == 0)
             return Array.Empty<double>();
-        }
 
-        var max = list.Select(Math.Abs).Max();
-        if (Math.Abs(max) < 1e-9)
-        {
-            // Avoid division by zero – return zeros
-            return list.Select(_ => 0.0).ToArray();
-        }
+        var maxAbsValue = CalculateMaxAbs(sampleArray);
+        if (Math.Abs(maxAbsValue) < ZeroEpsilon)
+            return CreateZeros(sampleArray.Length);
 
-        return list.Select(x => x / max).ToArray();
+        return NormalizeValues(sampleArray, maxAbsValue);
     }
 
     public double GetAverage(IEnumerable<double> samples)
     {
-        var arr = samples.ToArray();
-        if (arr.Length == 0)
-        {
-            return 0;
-        }
-
-        return arr.Average();
+        var sampleArray = samples as double[] ?? samples.ToArray();
+        return sampleArray.Length == 0 ? 0 : sampleArray.Average();
     }
+
+    private void UpdateStatistics(int length)
+    {
+        Statistics.LastLength = length;
+        Statistics.TotalOperations++;
+    }
+
+    private static double CalculateMaxAbs(double[] arr)
+        => arr.Max(v => Math.Abs(v));
+
+    private static double[] CreateZeros(int length)
+        => Enumerable.Repeat(0.0, length).ToArray();
+
+    private static double[] NormalizeValues(double[] arr, double max)
+        => arr.Select(v => v / max).ToArray();
 }
 
 public class SignalStatistics
 {
-    public int TotalOperations { get; set; }
-    public int LastLength { get; set; }
+    public int TotalOperations { get; private set; }
+    public int LastLength { get; private set; }
 }
