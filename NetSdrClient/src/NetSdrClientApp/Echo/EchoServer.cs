@@ -6,7 +6,7 @@ public class EchoServer
     private const string EmptyMarker = "[empty]";
     private const string UpperCommand = "/upper";
     private const string RepeatCommand = "/repeat";
-
+    
     public string Process(string? input)
     {
         if (input is null)
